@@ -1,0 +1,348 @@
+-------------------- 	entities 	----------------------------------------
+----------------------------------------------------------------------------------------------------
+package com.example.backend.entity;
+
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+public class Receita {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+    private String nome;
+    private Integer tempoPreparo;
+    private Double custoAproximado;
+
+    @ManyToMany
+    @JoinTable(
+            name = "receita_ingrediente",
+            joinColumns = @JoinColumn(name = "receita_id"),
+            inverseJoinColumns = @JoinColumn(name = "ingrediente_id")
+    )
+    private List<Ingrediente> ingredientes = new ArrayList<>();
+
+    public void addIngrediente(Ingrediente ingrediente) {
+        ingredientes.add(ingrediente);
+    }
+
+    public void removeIngrediente(Ingrediente ingrediente) {
+        ingredientes.remove(ingrediente);
+    }
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+
+    public Integer getTempoPreparo() { return tempoPreparo; }
+    public void setTempoPreparo(Integer tempoPreparo) { this.tempoPreparo = tempoPreparo; }
+
+    public Double getCustoAproximado() { return custoAproximado; }
+    public void setCustoAproximado(Double custoAproximado) { this.custoAproximado = custoAproximado; }
+
+    public List<Ingrediente> getIngredientes() { return ingredientes; }
+    public void setIngredientes(List<Ingrediente> ingredientes) { this.ingredientes = ingredientes; }
+}
+
+package com.example.backend.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
+public class Ingrediente {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    private String nome;
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+}
+
+-------------------- 	controller 	----------------------------------------
+----------------------------------------------------------------------------------------------------
+package com.example.backend.controller;
+
+import com.example.backend.entity.Ingrediente;
+import com.example.backend.entity.Receita;
+import com.example.backend.repository.IngredienteRepository;
+import com.example.backend.repository.ReceitaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@CrossOrigin(origins = "*") <---- adicionar no inrediente tbm
+@RestController
+@RequestMapping("/receitas")
+public class ReceitaController {
+
+    @Autowired
+    private ReceitaRepository receitaRepository;
+
+    @Autowired
+    private IngredienteRepository ingredienteRepository;
+
+    @PostMapping
+    public Receita createReceita(@RequestBody Receita receita) {
+        return receitaRepository.save(receita);
+    }
+
+    @GetMapping
+    public Iterable<Receita> getAllReceitas() {
+        return receitaRepository.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Receita getReceitaById(@PathVariable String id) {
+        return receitaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
+    }
+
+    @PutMapping("/{id}")
+    public Receita updateReceita(@PathVariable String id, @RequestBody Receita receitaDetails) {
+        Receita receita = receitaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
+
+        receita.setNome(receitaDetails.getNome());
+        receita.setCustoAproximado(receitaDetails.getCustoAproximado());
+        receita.setTempoPreparo(receitaDetails.getTempoPreparo());
+
+        return receitaRepository.save(receita);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteReceita(@PathVariable String id) {
+        receitaRepository.deleteById(id);
+    }
+
+    @PostMapping("/{receitaId}/ingredientes/{ingredienteId}")
+    public Receita addIngredienteToReceita(@PathVariable String receitaId, @PathVariable String ingredienteId) {
+        Receita receita = receitaRepository.findById(receitaId)
+                .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
+        Ingrediente ingrediente = ingredienteRepository.findById(ingredienteId)
+                .orElseThrow(() -> new RuntimeException("Ingrediente não encontrado"));
+
+        receita.addIngrediente(ingrediente);
+        return receitaRepository.save(receita);
+    }
+
+    @DeleteMapping("/{receitaId}/ingredientes/{ingredienteId}")
+    public Receita removeIngredienteFromReceita(@PathVariable String receitaId, @PathVariable String ingredienteId) {
+        Receita receita = receitaRepository.findById(receitaId)
+                .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
+        Ingrediente ingrediente = ingredienteRepository.findById(ingredienteId)
+                .orElseThrow(() -> new RuntimeException("Ingrediente não encontrado"));
+
+        receita.removeIngrediente(ingrediente);
+        return receitaRepository.save(receita);
+    }
+}
+
+
+
+
+spring.application.name=backend
+spring.datasource.url=jdbc:postgresql://localhost:5432/teste3
+spring.datasource.username=postgres
+spring.datasource.password=12345
+
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+
+
+---------------------------------------  REACT ----------------------------------------------
+    npm create vite@latest frontend --template react
+    npm i
+
+import React, { useState } from "react";
+
+export default function AddReceitaForm() {
+  const [nome, setNome] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const ingrediente = {
+      nome,
+    };
+
+    try {
+      const response = await fetch("http://localhost:8080/ingrediente", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(ingrediente),
+      });
+      if (response.ok) {
+        setMessage("ingrediente adicionada com sucesso!");
+        setNome("");
+      } else {
+        setMessage("Erro ao adicionar ingrediente!");
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage("Erro de conexão com o servidor.");
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: "400px", margin: "0 auto" }}>
+      <h2>Adicionar ingrediente</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Nome:</label>
+          <input
+            type="text"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            required
+          />
+        </div>
+
+        <button type="submit">Salvar ingrediente</button>
+      </form>
+
+      {message && <p>{message}</p>}
+    </div>
+  );
+}
+
+import React, { useState, useEffect } from "react";
+
+export default function AddReceitaForm() {
+  const [nome, setNome] = useState("");
+  const [tempoPreparo, setTempoPreparo] = useState("");
+  const [custoAproximado, setCustoAproximado] = useState("");
+  const [ingredientes, setIngredientes] = useState([]);
+  const [ingredienteSelecionado, setIngredienteSelecionado] = useState("");
+  const [message, setMessage] = useState("");
+
+  // Carregar ingredientes do backend ao montar o componente
+  useEffect(() => {
+    const fetchIngredientes = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/ingrediente");
+        if (response.ok) {
+          const data = await response.json();
+          setIngredientes(data);
+        } else {
+          console.error("Erro ao carregar ingredientes");
+        }
+      } catch (error) {
+        console.error("Erro de conexão com o servidor", error);
+      }
+    };
+
+    fetchIngredientes();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const receita = {
+      nome,
+      tempoPreparo: parseInt(tempoPreparo),
+      custoAproximado: parseFloat(custoAproximado),
+      ingredienteId: ingredienteSelecionado, // enviar ID do ingrediente
+    };
+
+    try {
+      const response = await fetch("http://localhost:8080/receitas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(receita),
+      });
+
+      if (response.ok) {
+        setMessage("Receita adicionada com sucesso!");
+        setNome("");
+        setTempoPreparo("");
+        setCustoAproximado("");
+        setIngredienteSelecionado("");
+      } else {
+        setMessage("Erro ao adicionar receita!");
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage("Erro de conexão com o servidor.");
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: "400px", margin: "0 auto" }}>
+      <h2>Adicionar Receita</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Nome:</label>
+          <input
+            type="text"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label>Tempo de Preparo (min):</label>
+          <input
+            type="number"
+            value={tempoPreparo}
+            onChange={(e) => setTempoPreparo(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label>Custo Aproximado (R$):</label>
+          <input
+            type="number"
+            step="0.01"
+            value={custoAproximado}
+            onChange={(e) => setCustoAproximado(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label>Ingrediente:</label>
+          <select
+            value={ingredienteSelecionado}
+            onChange={(e) => setIngredienteSelecionado(e.target.value)}
+            required
+          >
+            <option value="">Selecione um ingrediente</option>
+            {ingredientes.map((ingrediente) => (
+              <option key={ingrediente.id} value={ingrediente.id}>
+                {ingrediente.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button type="submit">Salvar Receita</button>
+      </form>
+
+      {message && <p>{message}</p>}
+    </div>
+  );
+}
+
+
