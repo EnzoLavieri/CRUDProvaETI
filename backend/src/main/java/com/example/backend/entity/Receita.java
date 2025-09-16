@@ -1,25 +1,40 @@
 package com.example.backend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Receita {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
     private String nome;
-    private double tempoPreparo;
-    private float custoAproximado;
+    private Integer tempoPreparo;
+    private Double custoAproximado;
 
-    public long getId() {
+    @ManyToMany
+    @JoinTable(
+            name = "receita_ingrediente",
+            joinColumns = @JoinColumn(name = "receita_id"),
+            inverseJoinColumns = @JoinColumn(name = "ingrediente_id")
+    )
+    private List<Ingrediente> ingredientes = new ArrayList<>();
+
+    public void addIngrediente(Ingrediente ingrediente) {
+        ingredientes.add(ingrediente);
+    }
+
+    public void removeIngrediente(Ingrediente ingrediente) {
+        ingredientes.remove(ingrediente);
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -31,19 +46,27 @@ public class Receita {
         this.nome = nome;
     }
 
-    public double getTempoPreparo() {
+    public Integer getTempoPreparo() {
         return tempoPreparo;
     }
 
-    public void setTempoPreparo(double tempoPreparo) {
+    public void setTempoPreparo(Integer tempoPreparo) {
         this.tempoPreparo = tempoPreparo;
     }
 
-    public float getCustoAproximado() {
+    public Double getCustoAproximado() {
         return custoAproximado;
     }
 
-    public void setCustoAproximado(float custoAproximado) {
+    public void setCustoAproximado(Double custoAproximado) {
         this.custoAproximado = custoAproximado;
+    }
+
+    public List<Ingrediente> getIngredientes() {
+        return ingredientes;
+    }
+
+    public void setIngredientes(List<Ingrediente> ingredientes) {
+        this.ingredientes = ingredientes;
     }
 }
