@@ -8,10 +8,12 @@ import RelacionarEntidades from './RelacionarIngredienteReceita.js'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <div>
-      <AddReceitaForm></AddReceitaForm>
-      <AddIngredienteForm></AddIngredienteForm>
+      <div style={{display:"flex", gap:"40px", backgroundColor:"#474747", padding:"18px 40px", borderRadius:"20px"}}>
+        <AddReceitaForm></AddReceitaForm>
+        <AddIngredienteForm></AddIngredienteForm>
       </div>
-      <RelacionarEntidades></RelacionarEntidades>
+      <div style={{marginTop:"10px", backgroundColor:"#777777ff", padding:"10px", borderRadius:"20px"}}>
+        <RelacionarEntidades ></RelacionarEntidades>
+      </div>
   </StrictMode>,
 )

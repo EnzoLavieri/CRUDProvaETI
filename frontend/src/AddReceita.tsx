@@ -66,7 +66,7 @@ export default function AddReceitaForm() {
       <h2>Criar Receita</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Nome:</label>
+          <label>Nome</label><br/>
           <input
             type="text"
             value={nome}
@@ -76,7 +76,7 @@ export default function AddReceitaForm() {
         </div>
 
         <div>
-          <label>Tempo de Preparo (min):</label>
+          <label>Tempo de Preparo (min)</label><br/>
           <input
             type="number"
             value={tempoPreparo}
@@ -86,7 +86,7 @@ export default function AddReceitaForm() {
         </div>
 
         <div>
-          <label>Custo Aproximado (R$):</label>
+          <label>Custo Aproximado (R$)</label><br/>
           <input
             type="number"
             step="0.01"
@@ -96,23 +96,7 @@ export default function AddReceitaForm() {
           />
         </div>
 
-        {/* <div>
-          <label>Ingrediente:</label>
-          <select
-            value={ingredienteSelecionado}
-            onChange={(e) => setIngredienteSelecionado(e.target.value)}
-            //required
-          >
-            <option value="">Selecione um ingrediente</option>
-            {ingredientes.map((ingrediente) => (
-              <option key={ingrediente.id} value={ingrediente.id}>
-                {ingrediente.nome}
-              </option>
-            ))}
-          </select>
-        </div> */}
-
-        <button type="submit">Salvar Receita</button>
+        <button type="submit" style={{margin:"20px"}}>Salvar Receita</button>
       </form>
 
       {message && <p>{message}</p>}

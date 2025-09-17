@@ -86,7 +86,8 @@ export default function RelacionarEntidades() {
 
   return (
     <div style={{ maxWidth: "400px", margin: "0 auto" }}>
-      <h2>Adicionar ingrediente</h2>
+        <h4>(Dar F5 para receita aparecer)</h4>
+      <h2>Adicionar ingrediente à receita</h2>
       <form onSubmit={handleSubmit}>
         <div>
           <label>Receita:</label>
@@ -94,7 +95,7 @@ export default function RelacionarEntidades() {
             value={receitaSelecionada}
             onChange={(e) => setReceitaSelecionada(e.target.value)}
           >
-            <option value="">Selecione um ingrediente</option>
+            <option value="">Selecione uma receita</option>
             {receitas.map((receitas) => (
               <option key={receitas.id} value={receitas.id}>
                 {receitas.nome}
@@ -117,7 +118,7 @@ export default function RelacionarEntidades() {
           </select>
         </div>
 
-        <button type="submit">Salvar Receita</button>
+        <button type="submit" style={{margin:"20px"}}>Atribuir ingrediente</button>
       </form>
 
       {message && <p>{message}</p>}

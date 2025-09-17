@@ -36,7 +36,7 @@ export default function AddIngredienteForm() {
       <h2>Criar ingrediente</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Nome:</label>
+          <label>Nome</label><br/>
           <input
             type="text"
             value={nome}
@@ -45,7 +45,7 @@ export default function AddIngredienteForm() {
           />
         </div>
 
-        <button type="submit">Salvar ingrediente</button>
+        <button type="submit" style={{margin:"20px"}}>Salvar ingrediente</button>
       </form>
 
       {message && <p>{message}</p>}
