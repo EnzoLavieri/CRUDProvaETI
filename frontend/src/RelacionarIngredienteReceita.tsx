@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 
-export default function AddReceitaForm() {
+export default function RelacionarEntidades() {
   const [nome, setNome] = useState("");
   const [tempoPreparo, setTempoPreparo] = useState("");
   const [custoAproximado, setCustoAproximado] = useState("");
   const [ingredientes, setIngredientes] = useState([]);
+  const [receitas, setReceita] = useState([]);
   const [ingredienteSelecionado, setIngredienteSelecionado] = useState("");
+  const [receitaSelecionada, setReceitaSelecionada] = useState("");
   const [message, setMessage] = useState("");
 
-  // Carregar ingredientes do backend ao montar o componente
   useEffect(() => {
     const fetchIngredientes = async () => {
       try {
@@ -25,20 +26,42 @@ export default function AddReceitaForm() {
     };
 
     fetchIngredientes();
+    
   }, []);
+
+    useEffect(() => {
+    const fetchReceitas = async () => {
+      try {
+        const response = await fetch("http://localhost:8081/receitas");
+        if (response.ok) {
+          const data = await response.json();
+          setReceita(data);
+        } else {
+          console.error("Erro ao carregar ingredientes");
+        }
+      } catch (error) {
+        console.error("Erro de conexão com o servidor", error);
+      }
+    };
+
+    fetchReceitas();
+    
+  }, []);
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const receita = {
-      nome,
+      nome:receitaSelecionada,
       tempoPreparo: parseInt(tempoPreparo),
       custoAproximado: parseFloat(custoAproximado),
       ingredienteId: ingredienteSelecionado, 
     };
 
     try {
-      const response = await fetch("http://localhost:8081/receitas", {
+      const response = await fetch(`http://localhost:8081/receitas/${receitaSelecionada}/ingredientes/${ingredienteSelecionado}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,45 +86,27 @@ export default function AddReceitaForm() {
 
   return (
     <div style={{ maxWidth: "400px", margin: "0 auto" }}>
-      <h2>Criar Receita</h2>
+      <h2>Adicionar ingrediente</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Nome:</label>
-          <input
-            type="text"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            required
-          />
+          <label>Receita:</label>
+          <select
+            value={receitaSelecionada}
+            onChange={(e) => setReceitaSelecionada(e.target.value)}
+          >
+            <option value="">Selecione um ingrediente</option>
+            {receitas.map((receitas) => (
+              <option key={receitas.id} value={receitas.id}>
+                {receitas.nome}
+              </option>
+            ))}
+          </select>
         </div>
-
-        <div>
-          <label>Tempo de Preparo (min):</label>
-          <input
-            type="number"
-            value={tempoPreparo}
-            onChange={(e) => setTempoPreparo(e.target.value)}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Custo Aproximado (R$):</label>
-          <input
-            type="number"
-            step="0.01"
-            value={custoAproximado}
-            onChange={(e) => setCustoAproximado(e.target.value)}
-            required
-          />
-        </div>
-
-        {/* <div>
+                <div>
           <label>Ingrediente:</label>
           <select
             value={ingredienteSelecionado}
             onChange={(e) => setIngredienteSelecionado(e.target.value)}
-            //required
           >
             <option value="">Selecione um ingrediente</option>
             {ingredientes.map((ingrediente) => (
@@ -110,7 +115,7 @@ export default function AddReceitaForm() {
               </option>
             ))}
           </select>
-        </div> */}
+        </div>
 
         <button type="submit">Salvar Receita</button>
       </form>

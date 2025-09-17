@@ -33,7 +33,7 @@ export default function AddIngredienteForm() {
 
   return (
     <div style={{ maxWidth: "400px", margin: "0 auto" }}>
-      <h2>Adicionar ingrediente</h2>
+      <h2>Criar ingrediente</h2>
       <form onSubmit={handleSubmit}>
         <div>
           <label>Nome:</label>
